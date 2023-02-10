@@ -1,9 +1,10 @@
 # Import general modules
+import datetime
 import logging
 import os
 import pathlib
 
-
+import dateutil.utils
 import lusid_notifications
 from fbnsdkutilities import ApiClientFactory, ApiConfigurationLoader
 import lusid_notifications.models as ln_models
@@ -12,7 +13,7 @@ import json
 # Import LUSID Drive modules
 from lusid_drive.utilities import ApiClientFactory as DriveApiClientFactory
 
-from runner import create_temp_folder, add_file_to_temp_folder
+from setup_utils import create_temp_folder, add_file_to_temp_folder
 
 # Create loggers
 logging.basicConfig(level=logging.INFO)
@@ -53,10 +54,7 @@ def create_manual_email_subscription(scope, code):
 
     except lusid_notifications.ApiException as e:
         if json.loads(e.body)["code"] == 711:
-            logging.warning( json.loads(e.body)["detail"])
-        else:
-            raise
-
+            logging.warning(json.loads(e.body)["detail"])
 
 def notifications_setup():
 
@@ -86,6 +84,19 @@ def create_email_notification(scope, code):
     existing_notification = [i.description for i in notifications.values if i.description == description]
 
     if(not existing_notification):
+        # print(notifications_api.api_client.configuration._base_path)
+        # baseUrl = notifications_api.api_client.configuration._base_path.replace("notifications","")
+        # with open("./CreateEmail.html", "r") as file:
+        #     file1=file.read()
+        #     file1=str(file1)
+        #     #print(file1)
+        #     file1 = file1.replace("{{PortfolioScope}}", scope)
+        #     file1 = file1.replace("{{PortfolioCode}}", code)
+        #     file1 = file1.replace("{{PortfolioCreated}}", str(dateutil.utils.today()))
+        #     fiel1 = file1.replace("{{baseUrl}}", baseUrl)
+        #
+        # with open("./editedFile.html", "w") as filewrite:
+        #     filewrite.write(file1)
 
         notifications_api.create_email_notification(
                 scope=scope, code=code,
@@ -97,7 +108,7 @@ def create_email_notification(scope, code):
                     Please see results in the following LUSID drive directory:
                     <Enter LUSID Drive location here>
                     """,
-                    email_address_to=["steve.collie@finbourne.com"] # IMPORTANT - update this email
+                    email_address_to=["liberty.askew@finbourne.com"] # IMPORTANT - update this email
             )
         )
 
@@ -105,18 +116,21 @@ def create_email_notification(scope, code):
         logger.warning(f"Creation skipped because there are already notifications attached to subscription scope:{scope} code:{code}")
 
 if __name__ == "__main__":
-
     data_dir = pathlib.Path(__file__).parent.resolve()
 
+    secrets_path = os.getenv("FBN_SECRETS_PATH")
+    print(secrets_path)
     # Create API factory
     secrets_file = (
         pathlib.Path(__file__)
-        .parent.parent.parent.parent.parent.joinpath("runner", "secrets.json")
+        .parent.parent.parent.parent.parent.joinpath("runner", secrets_path)
         .resolve()
     )
+    print(secrets_file)
 
     # Notifications API
     config = ApiConfigurationLoader.load(lusid_notifications, secrets_file)
+
     naf = ApiClientFactory(lusid_notifications, token=config.access_token, api_secrets_filename=secrets_file)
     subs_api = naf.build(lusid_notifications.api.SubscriptionsApi)
     notifications_api = naf.build(lusid_notifications.api.NotificationsApi)
@@ -125,7 +139,7 @@ if __name__ == "__main__":
     api_factory = DriveApiClientFactory(token=config.access_token, api_secrets_filename=secrets_file)
 
     # Setup porfolio data in Drive
-    portfolio_setup_main(api_factory, data_dir)
+    # portfolio_setup_main(api_factory, data_dir)
 
     # Create email notifications
 
@@ -133,4 +147,4 @@ if __name__ == "__main__":
     # Uncomment to run.
     # This will attempt to generate emails.
 
-    #notifications_setup()
+    notifications_setup()

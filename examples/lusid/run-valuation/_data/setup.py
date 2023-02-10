@@ -9,7 +9,6 @@ import lusid.models as models
 from lusid_drive.utilities import ApiClientFactory as DriveApiClientFactory
 from lusid.utilities import ApiClientFactory as LusidApiClientFactory
 
-from runner import create_temp_folder, add_file_to_temp_folder
 
 # Create loggers
 logging.basicConfig(level=logging.INFO)

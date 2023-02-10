@@ -4,7 +4,7 @@ from pathlib import Path
 # Import LUSID Drive modules
 from lusid_drive.utilities import ApiClientFactory
 
-from runner import create_temp_folder, add_file_to_temp_folder
+from setup_utils import create_temp_folder, add_file_to_temp_folder
 
 # Create loggers
 logging.basicConfig(level=logging.DEBUG)

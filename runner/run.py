@@ -14,7 +14,8 @@ from urllib3.connection import HTTPConnection
 import socket
 from lusid_drive.utilities import ApiClientFactory
 from lusid_drive.utilities import ApiConfigurationLoader
-from runner import lusid_drive_setup, teardown_folder
+from setup_lusid_drive import lusid_drive_setup
+from setup_utils import teardown_folder
 from pathlib import Path
 
 # Create loggers
